@@ -39,6 +39,8 @@ def add_data_to_mongodb(festivals):
     db = client.festival_database
     collection = db.festivals
 
+    collection.delete_many({})
+
     # Inserting the data
     collection.insert_many(festivals)
     print(f"{len(festivals)} festivals inserted into MongoDB.")
