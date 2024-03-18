@@ -1,15 +1,18 @@
 import json
+
 import requests
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
 
 
 class Festival:
-    def __init__(self, name, description, city, location, start_date, end_date, price, age):
+    def __init__(self, name, description, city, location, latitude, longitude, start_date, end_date, price, age):
         self.name = name
         self.description = description
         self.city = city
         self.location = location
+        self.latitude = latitude
+        self.longitude = longitude
         self.start_date = start_date
         self.end_date = end_date
         self.price = price
@@ -21,6 +24,8 @@ class Festival:
             "description": self.description,
             "city": self.city,
             "location": self.location,
+            "latitude": self.latitude,
+            "longitude": self.longitude,
             "start_date": self.start_date,
             "end_date": self.end_date,
             "price": self.price,
@@ -57,12 +62,15 @@ def scrap_festival_information():
             description = jsn.get("description")
             city = jsn.get("location", {}).get("address", {}).get("addressLocality")
             location = jsn.get("location", {}).get("name")
+            latitude = jsn.get("location", {}).get("geo", {}).get("latitude")
+            longitude = jsn.get("location", {}).get("geo", {}).get("longitude")
             start_date = jsn.get("startDate")
             end_date = jsn.get("endDate")
             price = jsn.get("offers", {}).get("price")
 
             all_festivals.append(
-                Festival(name, description, city, location, start_date, end_date, price, None).to_dict())
+                Festival(name, description, city, location, latitude, longitude, start_date, end_date, price, None)
+                .to_dict())
 
     add_data_to_mongodb(all_festivals)
 
