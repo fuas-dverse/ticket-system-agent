@@ -1,8 +1,7 @@
 import json
-
 import requests
 from bs4 import BeautifulSoup
-
+from pymongo import MongoClient
 
 class Festival:
     def __init__(self, name, description, city, location, start_date, end_date, price, age):
@@ -27,6 +26,15 @@ class Festival:
             "age": self.age,
         }
 
+def add_data_to_mongodb(festivals):
+    # Connection to MongoDB
+    client = MongoClient('mongodb://root:example@localhost:27017/')
+    db = client.festival_database
+    collection = db.festivals
+
+    # Inserting the data
+    collection.insert_many(festivals)
+    print(f"{len(festivals)} festivals inserted into MongoDB.")
 
 def scrap_festival_information():
     base_url = "https://festivalfans.nl/agenda/"
@@ -52,8 +60,7 @@ def scrap_festival_information():
 
             all_festivals.append(Festival(name, description, city, location, start_date, end_date, price, None).to_dict())
 
-    print(all_festivals)
-
+    add_data_to_mongodb(all_festivals)
 
 if __name__ == "__main__":
     scrap_festival_information()
