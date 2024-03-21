@@ -18,7 +18,7 @@ open_ai_client = OpenAI(
 
 class Festival:
     def __init__(self, name, description, city, location, latitude, longitude, start_date, end_date, season, price,
-                 age):
+                 age, name_embedding):
         self.name = name
         self.description = description
         self.city = city
@@ -31,6 +31,7 @@ class Festival:
         self.price = price
         self.age = age
         self.embeddings = None
+        self.name_embedding = None
 
     def to_dict(self):
         return {
@@ -45,7 +46,7 @@ class Festival:
             "season": self.season,
             "price": self.price,
             "age": self.age,
-            "embeddings": None,
+            "name_embedding": self.name_embedding
         }
 
 
@@ -131,6 +132,7 @@ def scrap_festival_information():
                     end_date,
                     get_season_from_date(start_date),
                     price,
+                    None,
                     None
                 ).to_dict()
             )
@@ -142,11 +144,15 @@ def scrap_festival_information():
 def generate_embedding(all_festivals):
     for festival in all_festivals:
         name_embedding = open_ai_client.embeddings.create(
-            input=festival["name"],
+            input=[
+                festival["name"],
+                festival["season"]
+            ],
             model="text-embedding-3-small",
+            dimensions=1536
         ).data[0].embedding
 
-        festival["embeddings"] = FestivalEmbeddings(name_embedding).to_dict()
+        festival["name_embedding"] = name_embedding
 
 
 if __name__ == "__main__":
