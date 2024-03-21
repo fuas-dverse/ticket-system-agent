@@ -1,10 +1,8 @@
 import json
-
-from bson import json_util
+import os
 from dotenv import load_dotenv
 from openai import OpenAI
 from pymongo import MongoClient
-import os
 
 load_dotenv()
 
@@ -24,19 +22,23 @@ def vector_search(query_vector):
                 "index": "vector_index",
                 "path": "name_embedding",
                 "queryVector": query_vector,
-                "numCandidates": 10000,
-                "limit": 2
+                "numCandidates": 3,
+                "limit": 3
             }
         }
     ]))
 
+    new_result = [{k: v for k, v in item.items() if k != 'name_embedding'} for item in result]
+
     with open('output.json', 'w') as json_file:
-        json.dump(result, json_file, default=str)
+        json.dump(new_result, json_file, default=str)
 
 
 if __name__ == "__main__":
+    user_input = input("> Enter a search query: ")
+
     vector = name_embedding = open_ai_client.embeddings.create(
-            input="asdasdasdad",
+            input=user_input,
             model="text-embedding-3-small",
             dimensions=1536
     ).data[0].embedding

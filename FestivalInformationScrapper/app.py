@@ -17,8 +17,7 @@ open_ai_client = OpenAI(
 
 
 class Festival:
-    def __init__(self, name, description, city, location, latitude, longitude, start_date, end_date, season, price,
-                 age, name_embedding):
+    def __init__(self, name, description, city, location, latitude, longitude, start_date, end_date, season, price, age, embedding):
         self.name = name
         self.description = description
         self.city = city
@@ -30,8 +29,7 @@ class Festival:
         self.season = season
         self.price = price
         self.age = age
-        self.embeddings = None
-        self.name_embedding = None
+        self.embedding = None
 
     def to_dict(self):
         return {
@@ -46,17 +44,7 @@ class Festival:
             "season": self.season,
             "price": self.price,
             "age": self.age,
-            "name_embedding": self.name_embedding
-        }
-
-
-class FestivalEmbeddings:
-    def __init__(self, name_embedding):
-        self.name_embedding = name_embedding
-
-    def to_dict(self):
-        return {
-            "name_embedding": self.name_embedding,
+            "embedding": self.embedding
         }
 
 
