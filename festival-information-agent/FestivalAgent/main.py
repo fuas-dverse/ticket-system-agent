@@ -1,30 +1,74 @@
-from openai import OpenAI
+import json
+import os
+from dotenv import load_dotenv
+from langchain_community.vectorstores.mongodb_atlas import MongoDBAtlasVectorSearch
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnableParallel, RunnablePassthrough
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
-client = OpenAI(
-    api_key="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-)
+load_dotenv()
 
-messages = [{
-    "role": "system",
-    "content": "You are a helpful assistant, that can assist in answering questions and providing information about "
-               "upcoming and past festivals. If any other question is asked then some sort of information about "
-               "festivals, respond with 'I do not have any knowledge about that! Ask me about festivals!'"
-}]
+MONGO_URI = os.environ.get("MONGO_URI")
+DB_NAME = "festival_database"
+COLLECTION_NAME = "festivals"
+ATLAS_VECTOR_SEARCH_INDEX_NAME = "vector_index"
 
-while True:
-    user_input = input("You: ")
-    messages.append({
-        "role": "user",
-        "content": user_input,
-    })
 
-    chat_completion = client.chat.completions.create(
-        messages=messages,
-        model="gpt-4-0125-preview",
+def get_vector_search_data(search_input):
+    vectorstore = MongoDBAtlasVectorSearch.from_connection_string(
+        MONGO_URI,
+        DB_NAME + "." + COLLECTION_NAME,
+        embedding=OpenAIEmbeddings(disallowed_special=(), model="text-embedding-3-small"),
+        index_name=ATLAS_VECTOR_SEARCH_INDEX_NAME,
+        text_key="name"
     )
 
-    messages.append({
-        "role": "assistant",
-        "content": chat_completion.choices[0].message.content,
+    vectorstore = vectorstore.as_retriever(search_kwargs={"k": 10})
+
+    output = vectorstore.get_relevant_documents(search_input)
+    for item in output:
+        if hasattr(item, "metadata") and "embedding" in item.metadata:
+            del item.metadata["embedding"]
+
+        if hasattr(item, "metadata") and "_id" in item.metadata:
+            del item.metadata["_id"]
+
+    return output
+
+
+def get_festival_information(context, question):
+    prompt = ChatPromptTemplate.from_template(
+        """Answer the question based only on the following context: {context}
+        Question: {question}"""
+    )
+
+    model = ChatOpenAI()
+
+    chain = (
+            RunnableParallel({
+                "context": str,
+                "question": RunnablePassthrough()
+            })
+            | prompt
+            | model
+            | StrOutputParser()
+    )
+
+    return chain.invoke({
+        "context": context,
+        "question": question
     })
-    print("AI:", chat_completion.choices[0].message.content)
+
+
+if __name__ == "__main__":
+    user_input = input("> Query: ")
+
+    vector_search = get_vector_search_data(user_input)
+
+    result = get_festival_information(
+        context=vector_search,
+        question=user_input
+    )
+
+    print(result)
