@@ -132,7 +132,8 @@ To get a better understanding about the flow of our application, we need to anal
 This brainstorm session is together with Brett & Reno, the creators of this research paper. For this, we will try to think of as many as possible ideas on how to tackle the problem presented with this question.
 
 ##### Session
-![[Brainstorm Session 05-04-2024 - Result.png]]
+![Brainstorm Session 05-04-2024 - Result](https://github.com/fuas-dverse/ticket-system-agent/assets/43666923/9e620680-7c67-4b5f-b89d-97da3294b499)
+
 ##### Filtering
 For this filtering, I will look through all the items created in the brainstorm session, and give a color to each of the items.
 
@@ -143,7 +144,8 @@ For this filtering, I will look through all the items created in the brainstorm 
 <span style="color: red">Red color:</span>
 - Item will be ignored and no further action required.
 
-![[Brainstorm Session 05-04-2024 - Result Filtered.png]]
+![Brainstorm Session 05-04-2024 - Result Filtered](https://github.com/fuas-dverse/ticket-system-agent/assets/43666923/d4f4e5a8-0b66-40cb-9359-a4b6dca628ad)
+
 
 #### Prototype
 Before starting to create a prototype based on the research that we have done this far. Let's start by specifying what we want to learn when creating this prototype.
@@ -153,13 +155,13 @@ I think that the main thing that we want to learn is already described in the [c
 `How can fetch the data from the database based on a prompt given by the user and then feed it to our Open AI API to return a human like answer.`
 
 ##### Early-stage prototype
-![[WhatsApp Image 2024-04-05 at 10.42.43.jpeg]]
+![WhatsApp Image 2024-04-05 at 10 42 43](https://github.com/fuas-dverse/ticket-system-agent/assets/43666923/982d492b-15e8-4cb6-b648-2b7f02f26bca)
 
 ##### Vector Search
 Now that I have a more global idea on what needs to happen, I am going to create a low functionality prototype on how to use vector search within the chosen database engine (MongoDB).
 
 So, what is already present from the sketch at this moment? I have already created the 'Python Scrapper' to inserts data into a MongoDB cloud instance and created an embedding using the Open AI embedding models for the name and season of the festivals. This embedding is inserted into the 'embedding' field of the database.
-![[Pasted image 20240405105943.png]]
+![Pasted image 20240405105943](https://github.com/fuas-dverse/ticket-system-agent/assets/43666923/eb7a1a8f-4769-4d2a-a449-cadd1faeabb3)
 
 Before creating any code, we need to set up the search index inside the MongoDB cloud instance.
 
@@ -367,7 +369,8 @@ def test_vector_search_output_created(benchmark, test_vector_object):
     assert os.path.exists('output.json') is True
 ```
 ##### Results
-![[Pasted image 20240405132701.png]]
+![Pasted image 20240405132701](https://github.com/fuas-dverse/ticket-system-agent/assets/43666923/2e0a9a68-b4ea-4d91-9945-40d65bcbd15d)
+
 #### Non-functional test
 
 ##### Performance tests
@@ -377,7 +380,8 @@ pytest test.py -v -s --benchmark-sort=mean --benchmark-min-rounds=100
 ```
 This command will run 100 rounds of the specified test and get the performance from it.
 ###### Output
-![[Pasted image 20240405133602.png]]
+![Pasted image 20240405133602](https://github.com/fuas-dverse/ticket-system-agent/assets/43666923/f8256021-3f14-44bc-b002-225ad5bc213e)
+
 
 ### Reflection
 In conducting this research, my primary objective was to identify effective techniques for searching a database based on user's preferences prompted in our Dverse application. I began by create the context of our project's challenges and the need for innovative solutions.
