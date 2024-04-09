@@ -1,4 +1,4 @@
-name: Build Linuc Container Image and Push to ACR
+name: Build Linux Container Image and Push to ACR
 
 on:
   workflow_dispatch:
