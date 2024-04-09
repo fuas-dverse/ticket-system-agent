@@ -14,15 +14,14 @@ jobs:
         working-directory: GoogleSearchAgent
     steps:
       - uses: actions/checkout@v2
+
       - uses: azure/docker-login@v1
         with:
           login-server: dversegooglesearchagent.azurecr.io
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Build and Push Docker image
         run: |
-          docker build . t dversegooglesearchagent.azurecr.io/myapp:${{ github.sha }}
+          docker build -t dversegooglesearchagent.azurecr.io/myapp:${{ github.sha }} .
           docker push dversegooglesearchagent.azurecr.io/myapp:${{ github.sha }}
-
-
-
-
