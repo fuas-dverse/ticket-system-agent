@@ -32,6 +32,7 @@ def require_api_key(view_function):
     return decorated_function
 
 
+
 @app.route('/', methods=['POST'])
 @require_api_key
 def get_response():
