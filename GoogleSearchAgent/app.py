@@ -37,7 +37,6 @@ def require_api_key(view_function):
 def get_response():
         data = request.json
         query = data.get("query")
-        print(query)
 
         if query is None or query == "":
             return jsonify({"error": "You must fill in a search query!"}), 400  # Using 400 for client error
