@@ -22,8 +22,6 @@ def fetch_google_results(query):
 
 
 def require_api_key(view_function):
-    print(view_function)
-    print("Hello world")
 
     def decorated_function(*args, **kwargs):
         if request.headers.get('key') and request.headers.get('key') == SECRET_API_KEY:
@@ -40,6 +38,7 @@ def get_response():
     if request.method == 'POST':
         data = request.json
         query = data.get("query")
+        print(query)
 
         if query is None or query == "":
             return jsonify({"error": "You must fill in a search query!"}), 400  # Using 400 for client error
