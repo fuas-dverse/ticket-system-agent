@@ -32,10 +32,9 @@ def require_api_key(view_function):
     return decorated_function
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['POST'])
 @require_api_key
 def get_response():
-    if request.method == 'POST':
         data = request.json
         query = data.get("query")
         print(query)
@@ -47,8 +46,6 @@ def get_response():
 
         return jsonify({'response': response}), 200
 
-    else:
-        return "Make a POST request to this url", 405
 
 
 if __name__ == '__main__':
