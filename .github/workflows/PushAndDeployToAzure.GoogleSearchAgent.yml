@@ -1,4 +1,4 @@
-name: Build Linux Container Image and Push to ACR
+name: Build, Push and Deploy to ACR and Web App
 
 env:
   AZURE_WEBAPP_NAME: DVerseGoogleSearchAgent  # set this to the name of your Azure Web App
@@ -7,6 +7,7 @@ on:
   push:
     paths:
       - GoogleSearchAgent/**
+      - .github/workflows/PushAzureContainerRegistry.GoogleSearchAgent.yml
     branches:
       - main
 
