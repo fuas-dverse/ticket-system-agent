@@ -7,7 +7,7 @@ on:
   push:
     paths:
       - GoogleSearchAgent/**
-      - .github/workflows/PushAzureContainerRegistry.GoogleSearchAgent.yml
+      - .github/workflows/PushAndDeployToAzure.GoogleSearchAgent.yml
     branches:
       - main
 
