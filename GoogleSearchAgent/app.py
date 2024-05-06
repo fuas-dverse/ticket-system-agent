@@ -1,6 +1,3 @@
-import json
-
-import requests
 from googlesearch import search
 from flask import Flask, request, jsonify, abort
 from dotenv import load_dotenv
@@ -22,9 +19,11 @@ def fetch_google_results(query):
 
 
 def require_api_key(view_function):
-
     def decorated_function(*args, **kwargs):
-        if request.headers.get('key') and request.headers.get('key') == SECRET_API_KEY:
+        expected_key = os.getenv('API_KEY')  # Make sure this matches your environment config
+        provided_key = request.headers.get('key')
+        print(f"Expected Key: {expected_key}, Provided Key: {provided_key}")  # Debug output
+        if provided_key and provided_key == expected_key:
             return view_function(*args, **kwargs)
         else:
             abort(401)  # Unauthorized access
@@ -32,20 +31,18 @@ def require_api_key(view_function):
     return decorated_function
 
 
-
 @app.route('/', methods=['POST'])
 @require_api_key
 def get_response():
-        data = request.json
-        query = data.get("query")
+    data = request.json
+    query = data.get("query")
 
-        if query is None or query == "":
-            return jsonify({"error": "You must fill in a search query!"}), 400  # Using 400 for client error
+    if query is None or query == "":
+        return jsonify({"error": "You must fill in a search query!"}), 400  # Using 400 for client error
 
-        response = fetch_google_results(query)
+    response = fetch_google_results(query)
 
-        return jsonify({'response': response}), 200
-
+    return jsonify({'response': response}), 200
 
 
 if __name__ == '__main__':

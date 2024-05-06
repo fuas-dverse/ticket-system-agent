@@ -1,3 +1,6 @@
 venv
 .idea
 .env
+tests
+.coverage
+__pycache__
