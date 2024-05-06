@@ -20,7 +20,10 @@ def fetch_google_results(query):
 
 def require_api_key(view_function):
     def decorated_function(*args, **kwargs):
-        if request.headers.get('key') and request.headers.get('key') == SECRET_API_KEY:
+        expected_key = os.getenv('API_KEY')  # Make sure this matches your environment config
+        provided_key = request.headers.get('key')
+        print(f"Expected Key: {expected_key}, Provided Key: {provided_key}")  # Debug output
+        if provided_key and provided_key == expected_key:
             return view_function(*args, **kwargs)
         else:
             abort(401)  # Unauthorized access

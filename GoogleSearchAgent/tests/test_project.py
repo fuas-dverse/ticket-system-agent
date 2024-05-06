@@ -1,6 +1,16 @@
-import json
-from unittest.mock import patch, Mock
-from app import fetch_google_results, require_api_key, get_response
+from unittest.mock import patch
+import pytest
+
+from app import fetch_google_results, app
+
+
+# Assume your Flask application is named 'app' and is imported correctly
+
+@pytest.fixture
+def test_app():
+    app.config['TESTING'] = True
+    with app.test_client() as client:
+        yield client
 
 
 def test_fetch_google_results_returns_expected_results():
@@ -11,26 +21,57 @@ def test_fetch_google_results_returns_expected_results():
 
 
 def test_require_api_key_allows_access_with_valid_key(test_app):
-    with patch('app.SECRET_API_KEY', 'valid_key'), patch('app.fetch_google_results') as mock_fetch:
-        mock_fetch.return_value = ['https://www.google.com', 'https://www.google.com', 'https://www.google.com']
-
-        @require_api_key
-        def dummy_route():
-            return "Success"
-
+    with patch('os.getenv', return_value='valid_key'), \
+            patch('app.fetch_google_results', return_value=['https://www.google.com']):
         headers = {
             'Content-type': 'application/json',
             'Accept': 'application/json',
             'key': 'valid_key'
         }
-
-        json = {
-            'query': 'Tickets for defcon1'
-        }
-
-        response = test_app.post('/', headers=headers, json=json)
+        response = test_app.post('/', headers=headers, json={'query': 'test query'})
         assert response.status_code == 200
 
 
-def test_if_query_is_not_null(test_app):
-    print("")
+def test_require_api_key_denies_access_with_invalid_key(test_app):
+    with patch('os.getenv', return_value='valid_key'):
+        headers = {
+            'Content-type': 'application/json',
+            'Accept': 'application/json',
+            'key': 'invalid_key'
+        }
+        response = test_app.post('/', headers=headers, json={'query': 'test query'})
+        assert response.status_code == 401
+
+
+def test_fetch_google_results_handles_errors_gracefully():
+    with patch('app.search') as mock_search:
+        mock_search.side_effect = Exception("Network Error")
+        results = fetch_google_results('test query')
+        assert results == []
+
+
+def test_get_response_returns_valid_results(test_app):
+    with patch('app.fetch_google_results') as mock_fetch, \
+            patch('os.getenv', return_value='valid_key'):
+        mock_fetch.return_value = ['https://www.example.com']
+        headers = {
+            'Content-type': 'application/json',
+            'Accept': 'application/json',
+            'key': 'valid_key'
+        }
+        response = test_app.post('/', headers=headers, json={'query': 'test query'})
+        assert response.status_code == 200
+        assert response.json == {'response': ['https://www.example.com']}
+
+
+def test_get_response_with_empty_query(test_app):
+    with patch('app.fetch_google_results') as mock_fetch, \
+            patch('os.getenv', return_value='valid_key'):
+        mock_fetch.return_value = ['https://www.example.com']
+        headers = {
+            'Content-type': 'application/json',
+            'Accept': 'application/json',
+            'key': 'valid_key'
+        }
+        response = test_app.post('/', headers=headers, json={'query': ''})  # Empty query
+        assert response.json == {'error': 'You must fill in a search query!'}
