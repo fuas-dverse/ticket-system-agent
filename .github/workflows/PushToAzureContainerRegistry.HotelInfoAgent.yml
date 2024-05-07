@@ -3,7 +3,7 @@ name: Build and Push to Azure
 on:
   push:
     paths:
-      - hotel-informatio-agent/**
+      - hotel-information-agent/**
     branches:
       - main
 
@@ -13,7 +13,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: hotel-informatio-agent
+        working-directory: hotel-information-agent
     steps:
       - uses: actions/checkout@v2
 
@@ -26,7 +26,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: hotel-informatio-agent
+        working-directory: hotel-information-agent
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
