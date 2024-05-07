@@ -1,4 +1,6 @@
 import pytest
+from requests import RequestException
+
 from app import app, search_hotels
 
 
@@ -43,3 +45,13 @@ def test_search_hotels_returns_hotels_when_city_found():
 def test_search_hotels_returns_empty_when_no_city_found():
     result = search_hotels('I want to book a hotel')
     assert result is None
+
+
+def mock_get(*args, **kwargs):
+    raise RequestException
+
+
+def test_request_exception(monkeypatch):
+    monkeypatch.setattr("requests.get", mock_get)
+    result = search_hotels("Amsterdam")
+    assert result == 'An error occurred: '

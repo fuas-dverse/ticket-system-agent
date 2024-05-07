@@ -33,7 +33,7 @@ def search_hotels(user_input):
                      "rating": hotel.get("review_score_word"), "price": hotel.get("min_total_price"),
                      "url": hotel.get("url"), "image": hotel.get("main_photo_url")} for hotel in hotels]
         except requests.exceptions.RequestException as e:
-            print(f"An error occurred: {e}")
+            return f"An error occurred: {e}"
     else:
         print("No city found in the input.")
 
