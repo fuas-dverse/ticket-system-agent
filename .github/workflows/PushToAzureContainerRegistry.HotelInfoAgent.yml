@@ -1,0 +1,41 @@
+name: Build and Push to Azure
+
+on:
+  push:
+    paths:
+      - hotel-informatio-agent/**
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: hotel-informatio-agent
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build Docker image
+        run: docker build -t dversehotelinformationagentcontainer.azurecr.io/app:${{ github.sha }} .
+
+  push:
+    runs-on: ubuntu-latest
+    needs: build
+    defaults:
+      run:
+        shell: bash
+        working-directory: hotel-informatio-agent
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - uses: azure/docker-login@v1
+        with:
+          login-server: dversehotelinformationagentcontainer.azurecr.io
+          username: ${{ secrets.RENO_REGISTRY_USERNAME }}
+          password: ${{ secrets.RENO_REGISTRY_PASSWORD }}
+
+      - name: Push Docker image
+        run: docker push dversehotelinformationagentcontainer.azurecr.io/app:${{ github.sha }}
