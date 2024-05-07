@@ -4,8 +4,6 @@ import pytest
 from app import fetch_google_results, app
 
 
-# Assume your Flask application is named 'app' and is imported correctly
-
 @pytest.fixture
 def test_app():
     app.config['TESTING'] = True
@@ -21,12 +19,11 @@ def test_fetch_google_results_returns_expected_results():
 
 
 def test_require_api_key_allows_access_with_valid_key(test_app):
-    with patch('os.getenv', return_value='valid_key'), \
-            patch('app.fetch_google_results', return_value=['https://www.google.com']):
+    with patch('os.getenv', return_value='valid_key'):
         headers = {
             'Content-type': 'application/json',
             'Accept': 'application/json',
-            'key': 'valid_key'
+            'Authorization': 'Bearer valid_key'
         }
         response = test_app.post('/', headers=headers, json={'query': 'test query'})
         assert response.status_code == 200
@@ -37,7 +34,7 @@ def test_require_api_key_denies_access_with_invalid_key(test_app):
         headers = {
             'Content-type': 'application/json',
             'Accept': 'application/json',
-            'key': 'invalid_key'
+            'Authorization': 'Bearer invalid_key'
         }
         response = test_app.post('/', headers=headers, json={'query': 'test query'})
         assert response.status_code == 401
@@ -57,7 +54,7 @@ def test_get_response_returns_valid_results(test_app):
         headers = {
             'Content-type': 'application/json',
             'Accept': 'application/json',
-            'key': 'valid_key'
+            'Authorization': 'Bearer valid_key'
         }
         response = test_app.post('/', headers=headers, json={'query': 'test query'})
         assert response.status_code == 200
@@ -71,7 +68,31 @@ def test_get_response_with_empty_query(test_app):
         headers = {
             'Content-type': 'application/json',
             'Accept': 'application/json',
-            'key': 'valid_key'
+            'Authorization': 'Bearer valid_key'
         }
         response = test_app.post('/', headers=headers, json={'query': ''})  # Empty query
+        assert response.status_code == 400
         assert response.json == {'error': 'You must fill in a search query!'}
+
+
+# Add a test to ensure that the security headers are correctly applied
+# Trying to modify the security headers in a request should not affect the original security settings
+def test_security_headers_are_applied(test_app):
+    with patch('app.fetch_google_results', return_value=['https://www.example.com']):
+        headers = {
+            'Content-type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': 'Bearer valid_key'
+        }
+        response = test_app.post('/', headers=headers, json={'query': 'test query'})
+
+        assert response.headers['Content-Security-Policy'] == "default-src 'self'"
+        assert response.headers['X-Content-Type-Options'] == 'nosniff'
+        assert response.headers['X-Frame-Options'] == 'DENY'
+        assert response.headers['X-XSS-Protection'] == '1; mode=block'
+
+        evil_headers = {
+            'X-Frame-Options': 'ALLOW-FROM evil.com'
+        }
+        response = test_app.post('/', headers={**headers, **evil_headers}, json={'query': 'test query'})
+        assert response.headers['X-Frame-Options'] == 'DENY'
