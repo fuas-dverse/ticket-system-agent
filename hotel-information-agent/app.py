@@ -1,7 +1,6 @@
 import requests
 import locationtagger
 from flask import Flask
-from init import download_nltk_data
 
 app = Flask(__name__)
 
@@ -13,8 +12,7 @@ def search_hotels(user_input):
         "Referrer-Policy": "strict-origin-when-cross-origin"
     }
 
-    city = locationtagger.find_locations(text=user_input.title()).cities[0] if locationtagger.find_locations(
-        text=user_input.title()).cities else None
+    city = locationtagger.find_locations(text=user_input.title()).cities[0] if locationtagger.find_locations(text=user_input.title()).cities else None
     if city:
         try:
             location_data = requests.get("https://booking-com.p.rapidapi.com/v1/hotels/locations", headers=headers,
@@ -48,8 +46,3 @@ def get_hotel(prompt: str):
         return {"error": "No hotels found."}
 
     return found_hotels
-
-
-if __name__ == "__main__":
-    download_nltk_data()
-    app.run(host="0.0.0.0", port=8080, debug=True)

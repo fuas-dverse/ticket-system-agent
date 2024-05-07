@@ -1,4 +1,4 @@
-name: Build and Push to Azure
+name: Build, Push and Deploy Hotel Information Agent to Azure
 
 on:
   push:
