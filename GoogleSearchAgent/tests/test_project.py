@@ -77,8 +77,10 @@ def test_get_response_with_empty_query(test_app):
 
 # Add a test to ensure that the security headers are correctly applied
 # Trying to modify the security headers in a request should not affect the original security settings
-def test_security_headers_are_applied(test_app):
-    with patch('app.fetch_google_results', return_value=['https://www.example.com']):
+def test_security_headers_are_strict(test_app):
+    with patch('app.fetch_google_results', return_value=['https://www.example.com']), \
+            patch('os.getenv', return_value='valid_key'):
+        # Setup the necessary authorization header to ensure the request succeeds
         headers = {
             'Content-type': 'application/json',
             'Accept': 'application/json',
@@ -86,13 +88,21 @@ def test_security_headers_are_applied(test_app):
         }
         response = test_app.post('/', headers=headers, json={'query': 'test query'})
 
+        # Check that the security headers are present and correctly set
+        assert response.status_code == 200
         assert response.headers['Content-Security-Policy'] == "default-src 'self'"
         assert response.headers['X-Content-Type-Options'] == 'nosniff'
         assert response.headers['X-Frame-Options'] == 'DENY'
         assert response.headers['X-XSS-Protection'] == '1; mode=block'
+        assert response.headers.get('Strict-Transport-Security') == 'max-age=63072000; includeSubDomains'
+        assert response.headers.get('Referrer-Policy') == 'no-referrer'
 
+        # Try to manipulate headers through the request
         evil_headers = {
-            'X-Frame-Options': 'ALLOW-FROM evil.com'
+            'X-Frame-Options': 'ALLOW-FROM evil.com',
+            'Content-Security-Policy': "default-src 'unsafe-all'"
         }
         response = test_app.post('/', headers={**headers, **evil_headers}, json={'query': 'test query'})
+        # Ensure headers are not influenced by client-side input
         assert response.headers['X-Frame-Options'] == 'DENY'
+        assert response.headers['Content-Security-Policy'] == "default-src 'self'"
