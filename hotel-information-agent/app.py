@@ -45,7 +45,7 @@ def get_hotel(prompt: str):
     found_hotels = search_hotels(prompt)
 
     if not found_hotels:
-        return {"error": "No hotels found!"}
+        return {"error": "No hotels found."}
 
     return found_hotels
 
