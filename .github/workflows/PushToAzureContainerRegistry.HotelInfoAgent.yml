@@ -35,6 +35,6 @@ jobs:
       - name: Deploy to Azure Web App  
         uses: azure/webapps-deploy@v2  
         with:  
-          app-name: DVerseHotelInfoAgent  
+          app-name: 'DVerseHotelInfoAgent'  
           publish-profile: ${{ secrets.HOTEL_INFO_AZURE_PUBLISH_PROFILE }}  
           images: 'dversehotelinformationagentcontainer.azurecr.io/app:${{ github.sha }}'
