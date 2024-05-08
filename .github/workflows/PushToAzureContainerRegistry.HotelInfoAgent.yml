@@ -17,6 +17,7 @@ env:
 
 jobs:
   test:
+    name: Unit Tests
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -38,6 +39,7 @@ jobs:
         run: pytest ./test_hotel_information_route.py --cov=app --cov-report=term --cov-fail-under=90
 
   performance_test:
+    name: Performance Tests
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -61,6 +63,7 @@ jobs:
 
   build_and_push:
     if: github.ref == 'refs/heads/main'
+    name: Build and Push Docker Image
     needs: [test, performance_test]
     runs-on: ubuntu-latest
     defaults:
@@ -85,6 +88,7 @@ jobs:
 
   deploy:
     if: github.ref == 'refs/heads/main'
+    name: Deploy to Azure Web App
     needs: build_and_push
     runs-on: ubuntu-latest
     steps:
