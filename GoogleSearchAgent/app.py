@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify, abort
 from dotenv import load_dotenv
 import os
 import sentry_sdk
+
 load_dotenv()
 
 SECRET_API_KEY = os.getenv('API_KEY')
@@ -64,6 +65,41 @@ def add_security_headers(response):
     response.headers['X-XSS-Protection'] = '1; mode=block'
     response.headers['Referrer-Policy'] = 'no-referrer'
     response.headers['Strict-Transport-Security'] = 'max-age=63072000; includeSubDomains'
+
+    response.headers['Permissions-Policy'] = (
+        "accelerometer=(), "
+        "ambient-light-sensor=(), "
+        "autoplay=(), "
+        "battery=(), "
+        "camera=(), "
+        "cross-origin-isolated=(), "
+        "display-capture=(), "
+        "document-domain=(), "
+        "encrypted-media=(), "
+        "execution-while-not-rendered=(), "
+        "execution-while-out-of-viewport=(), "
+        "fullscreen=(), "
+        "geolocation=(), "
+        "gyroscope=(), "
+        "layout-animations=(), "
+        "legacy-image-formats=(), "
+        "magnetometer=(), "
+        "microphone=(), "
+        "midi=(), "
+        "navigation-override=(), "
+        "oversized-images=(), "
+        "payment=(), "
+        "picture-in-picture=(), "
+        "publickey-credentials-get=(), "
+        "screen-wake-lock=(), "
+        "serial=(), "
+        "sync-xhr=(), "
+        "usb=(), "
+        "web-share=(), "
+        "xr-spatial-tracking=()"
+    )
+
+
     return response
 
 
