@@ -1,6 +1,6 @@
 import pytest
 from requests import RequestException
-
+from init import download_nltk_data
 from app import app, search_hotels
 
 
@@ -8,6 +8,11 @@ from app import app, search_hotels
 def client():
     with app.test_client() as client:
         return client
+
+
+@pytest.fixture(scope='session')
+def install_packages():
+    download_nltk_data()
 
 
 def test_get_api_endpoint(client):
