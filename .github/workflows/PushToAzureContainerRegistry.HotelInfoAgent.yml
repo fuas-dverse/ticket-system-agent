@@ -95,7 +95,7 @@ jobs:
 
   build_and_push:
     if: github.ref == 'refs/heads/main'
-    needs: [test, performance_test]
+    needs: test
     runs-on: ubuntu-latest
     defaults:
       run:
