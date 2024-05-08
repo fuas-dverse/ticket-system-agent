@@ -191,7 +191,7 @@ export default function DashboardLayout(
                                     className="overflow-hidden rounded-full"
                                 >
                                     <Image
-                                        src={session?.user?.image || '/avatar.png'}
+                                        src={session?.user?.image!}
                                         width={36}
                                         height={36}
                                         alt="Avatar"
@@ -200,7 +200,7 @@ export default function DashboardLayout(
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                                <DropdownMenuLabel>{session?.user?.name}</DropdownMenuLabel>
                                 <DropdownMenuSeparator/>
                                 <DropdownMenuItem onClick={() => signOut({
                                     redirect: true,
