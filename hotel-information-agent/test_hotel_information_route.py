@@ -16,12 +16,9 @@ def setup_locations_return_data():
 def setup_hotel_return_data():
     search_json = {
         "result": [
-            {"hotel_name": "Hotel1", "address": "Address1", "review_score_word": "Good", "min_total_price": "100",
-             "url": "url1", "main_photo_url": "url1"},
-            {"hotel_name": "Hotel1", "address": "Address1", "review_score_word": "Good", "min_total_price": "100",
-             "url": "url1", "main_photo_url": "url1"},
-            {"hotel_name": "Hotel1", "address": "Address1", "review_score_word": "Good", "min_total_price": "100",
-             "url": "url1", "main_photo_url": "url1"}
+            {"hotel_name": "Hotel1", "address": "Address1", "review_score_word": "Good", "min_total_price": "100", "url": "url1", "main_photo_url": "url1"},
+            {"hotel_name": "Hotel1", "address": "Address1", "review_score_word": "Good", "min_total_price": "100", "url": "url1", "main_photo_url": "url1"},
+            {"hotel_name": "Hotel1", "address": "Address1", "review_score_word": "Good", "min_total_price": "100", "url": "url1", "main_photo_url": "url1"}
         ]
     }
 
