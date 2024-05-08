@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - hotel-information-agent/**
+      - .github/workflows/PushToAzureContainerRegistry.HotelInfoAgent.yml
     branches:
       - main
 
@@ -22,6 +23,8 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: ${{ env.WORKING_DIRECTORY }}
 
       - uses: actions/setup-python@v2
         with:
