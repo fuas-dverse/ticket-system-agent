@@ -32,8 +32,8 @@ jobs:
       - name: Run pytest
         uses: pavelzw/pytest-action@v2
         with:
-          emoji: false
-          verbose: false
+          emoji: true
+          verbose: true
           job-summary: true
 
   build_and_push:
