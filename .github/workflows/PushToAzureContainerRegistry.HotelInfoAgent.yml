@@ -11,14 +11,39 @@ env:
   AZURE_WEBAPP_NAME: DverseHotelInformationAgentApp
   IMAGE_NAME: dversehotelinformationagentcontainer.azurecr.io/app
   IMAGE_TAG: ${{ github.sha }}
+  WORKING_DIRECTORY: hotel-information-agent
 
 jobs:
-  build_and_push:
+  test:
     runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
-        working-directory: hotel-information-agent
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.12'
+
+      - run: python -m pip install --upgrade pip && pip install -r requirements.txt
+
+      - name: Run pytest
+        uses: pavelzw/pytest-action@v2
+        with:
+          emoji: false
+          verbose: false
+          job-summary: true
+          custom-arguments: '--cov=app --cov-report=term --cov-fail-under=90'
+
+  build_and_push:
+    needs: test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ env.WORKING_DIRECTORY }}
     steps:
       - uses: actions/checkout@v4
 

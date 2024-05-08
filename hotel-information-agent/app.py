@@ -35,7 +35,7 @@ def search_hotels(user_input):
         except requests.exceptions.RequestException as e:
             return f"An error occurred: {e}"
     else:
-        print("No city found in the input.")
+        print("No city found in the input!")
 
 
 @app.route("/<prompt>", methods=['GET'])
