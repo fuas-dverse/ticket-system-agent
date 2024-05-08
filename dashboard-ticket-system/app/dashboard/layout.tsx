@@ -2,7 +2,7 @@
 import Link from "next/link";
 import {Globe, KeySquare, LineChart, LucideLayoutDashboard, Package2, PanelLeft, Search, Settings,} from "lucide-react";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
-import {Sheet, SheetContent, SheetTrigger} from "@/components/ui/sheet";
+import {Sheet, SheetClose, SheetContent, SheetTrigger} from "@/components/ui/sheet";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {
@@ -16,6 +16,9 @@ import {
 import Image from "next/image";
 import DynamicBreadCrumb from "@/components/DynamicBreadCrumb";
 import {usePathname} from "next/navigation";
+import {signOut, useSession} from "next-auth/react";
+import {useRouter} from "next/navigation";
+import {useEffect} from "react";
 
 export default function DashboardLayout(
     {
@@ -24,8 +27,17 @@ export default function DashboardLayout(
         children: React.ReactNode;
     }>) {
     const path = usePathname()
+    const router = useRouter()
     const paths = path.split('/').filter(p => p);
     const getTitle = paths[paths.length - 1].charAt(0).toUpperCase() + paths[paths.length - 1].slice(1);
+    const {data: session, status} = useSession();
+
+    useEffect(() => {
+        if (status === "unauthenticated") {
+            router.push("/login");
+        }
+    }, [router, status]);
+
     return (
         <TooltipProvider>
             <main className={"flex min-h-screen w-full flex-col bg-muted/40"}>
@@ -114,41 +126,51 @@ export default function DashboardLayout(
                             </SheetTrigger>
                             <SheetContent side="left" className="sm:max-w-xs">
                                 <nav className="grid gap-6 text-lg font-medium">
-                                    <Link
-                                        href="#"
-                                        className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
-                                    >
-                                        <Package2 className="h-5 w-5 transition-all group-hover:scale-110"/>
-                                        <span className="sr-only">Acme Inc</span>
-                                    </Link>
-                                    <Link
-                                        href="#"
-                                        className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                                    >
-                                        <LucideLayoutDashboard className="h-5 w-5"/>
-                                        Dashboard
-                                    </Link>
-                                    <Link
-                                        href="#"
-                                        className="flex items-center gap-4 px-2.5 text-foreground"
-                                    >
-                                        <Globe className="h-5 w-5"/>
-                                        Explore
-                                    </Link>
-                                    <Link
-                                        href="#"
-                                        className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                                    >
-                                        <KeySquare className="h-5 w-5"/>
-                                        Keys
-                                    </Link>
-                                    <Link
-                                        href="#"
-                                        className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                                    >
-                                        <LineChart className="h-5 w-5"/>
-                                        Usage
-                                    </Link>
+                                    <SheetClose asChild>
+                                        <Link
+                                            href="/dashboard"
+                                            className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
+                                        >
+                                            <Package2 className="h-5 w-5 transition-all group-hover:scale-110"/>
+                                            <span className="sr-only">Acme Inc</span>
+                                        </Link>
+                                    </SheetClose>
+                                    <SheetClose asChild>
+                                        <Link
+                                            href="/dashboard"
+                                            className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+                                        >
+                                            <LucideLayoutDashboard className="h-5 w-5"/>
+                                            Dashboard
+                                        </Link>
+                                    </SheetClose>
+                                    <SheetClose asChild>
+                                        <Link
+                                            href="/dashboard/explore"
+                                            className="flex items-center gap-4 px-2.5 text-foreground"
+                                        >
+                                            <Globe className="h-5 w-5"/>
+                                            Explore
+                                        </Link>
+                                    </SheetClose>
+                                    <SheetClose asChild>
+                                        <Link
+                                            href="/dashboard/keys"
+                                            className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+                                        >
+                                            <KeySquare className="h-5 w-5"/>
+                                            Keys
+                                        </Link>
+                                    </SheetClose>
+                                    <SheetClose asChild>
+                                        <Link
+                                            href="/dashboard/usage"
+                                            className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+                                        >
+                                            <LineChart className="h-5 w-5"/>
+                                            Usage
+                                        </Link>
+                                    </SheetClose>
                                 </nav>
                             </SheetContent>
                         </Sheet>
@@ -169,7 +191,7 @@ export default function DashboardLayout(
                                     className="overflow-hidden rounded-full"
                                 >
                                     <Image
-                                        src="/placeholder-user.jpg"
+                                        src={session?.user?.image || '/avatar.png'}
                                         width={36}
                                         height={36}
                                         alt="Avatar"
@@ -180,7 +202,10 @@ export default function DashboardLayout(
                             <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                                 <DropdownMenuSeparator/>
-                                <DropdownMenuItem>Logout</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => signOut({
+                                    redirect: true,
+                                    callbackUrl: '/login'
+                                })}>Logout</DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </header>
@@ -192,5 +217,5 @@ export default function DashboardLayout(
                 </div>
             </main>
         </TooltipProvider>
-);
+    );
 }
