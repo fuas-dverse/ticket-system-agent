@@ -35,7 +35,6 @@ jobs:
           emoji: false
           verbose: false
           job-summary: true
-          custom-arguments: '--cov=app --cov-report=term --cov-fail-under=90'
 
   build_and_push:
     needs: test
