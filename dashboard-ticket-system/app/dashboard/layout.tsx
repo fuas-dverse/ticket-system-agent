@@ -1,4 +1,3 @@
-"use client"
 import Link from "next/link";
 import {Globe, KeySquare, LineChart, LucideLayoutDashboard, Package2, PanelLeft, Search, Settings,} from "lucide-react";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
@@ -15,28 +14,27 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Image from "next/image";
 import DynamicBreadCrumb from "@/components/DynamicBreadCrumb";
-import {usePathname} from "next/navigation";
-import {signOut, useSession} from "next-auth/react";
-import {useRouter} from "next/navigation";
-import {useEffect} from "react";
+import { createClient } from "@/utils/supabase/server";
+import {redirect} from "next/navigation";
 
-export default function DashboardLayout(
+export default async function DashboardLayout(
     {
         children,
     }: Readonly<{
         children: React.ReactNode;
     }>) {
-    const path = usePathname()
-    const router = useRouter()
-    const paths = path.split('/').filter(p => p);
-    const getTitle = paths[paths.length - 1].charAt(0).toUpperCase() + paths[paths.length - 1].slice(1);
-    const {data: session, status} = useSession();
+    // const path = usePathname()
+    // const paths = path.split('/').filter(p => p);
+    // const getTitle = paths[paths.length - 1].charAt(0).toUpperCase() + paths[paths.length - 1].slice(1);
+    // const [session, setSession] = useState<Session|null>(null);
+    const supabase = createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
 
-    useEffect(() => {
-        if (status === "unauthenticated") {
-            router.push("/login");
-        }
-    }, [router, status]);
+    if (!user) {
+        return redirect("/login");
+    }
 
     return (
         <TooltipProvider>
@@ -191,7 +189,7 @@ export default function DashboardLayout(
                                     className="overflow-hidden rounded-full"
                                 >
                                     <Image
-                                        src={session?.user?.image!}
+                                        src={user.user_metadata?.avatar_url ?? '/avatar.png'}
                                         width={36}
                                         height={36}
                                         alt="Avatar"
@@ -200,18 +198,21 @@ export default function DashboardLayout(
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>{session?.user?.name}</DropdownMenuLabel>
+                                <DropdownMenuLabel>{user?.user_metadata?.name}</DropdownMenuLabel>
                                 <DropdownMenuSeparator/>
-                                <DropdownMenuItem onClick={() => signOut({
-                                    redirect: true,
-                                    callbackUrl: '/login'
-                                })}>Logout</DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                    <form action="/auth/signout" method="post">
+                                        <button type="submit">
+                                            Sign out
+                                        </button>
+                                    </form>
+                                </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </header>
                     <section
-                        className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3">
-                        <h1>{getTitle}</h1>
+                        className="p-4 sm:px-6 sm:py-0 ">
+                        {/*<h1 className={"text-3xl font-bold"}>{getTitle}</h1>*/}
                         {children}
                     </section>
                 </div>

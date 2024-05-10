@@ -1,9 +1,11 @@
 import type {Metadata} from "next";
 import {Inter as FontSans} from "next/font/google"
 import "./globals.css";
-
 import {cn} from "@/lib/utils"
-import {Providers} from "@/app/provider";
+
+const defaultUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://localhost:3000";
 
 const fontSans = FontSans({
     subsets: ["latin"],
@@ -11,6 +13,7 @@ const fontSans = FontSans({
 })
 
 export const metadata: Metadata = {
+    metadataBase: new URL(defaultUrl),
     title: "Ticket System Dashboard",
     description: "The Dashboard for managing API keys and usage",
 };
@@ -29,9 +32,9 @@ export default function RootLayout(
                 fontSans.variable
             )}
         >
-        <Providers>
+        {/*<Providers>*/}
             {children}
-        </Providers>
+        {/*</Providers>*/}
         </body>
         </html>
     );
