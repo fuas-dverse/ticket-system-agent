@@ -2,10 +2,20 @@ import {Button} from "@/components/ui/button";
 import Image from "next/image";
 import {Github} from 'lucide-react';
 import {signInWithGithub, signInWithGoogle} from "@/app/login/actions";
+import {createClient} from "@/utils/supabase/server";
+import {redirect} from "next/navigation";
 
-export default function Page() {
+export default async function Page() {
+    const supabase = createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+        return redirect("/dashboard");
+    }
     return (
-        <div className="w-full h-screen lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
+        <div className="w-full h-screen lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px] bg-white">
             <div className="flex items-center justify-center py-12">
                 <div className="mx-auto grid w-[350px] gap-6">
                     <div className="grid gap-2 text-center">
@@ -16,22 +26,9 @@ export default function Page() {
                         </p>
                     </div>
                     <form className="grid gap-4">
-                        {/*<Button onClick={() => signIn('github', {*/}
-                        {/*    callbackUrl: "/dashboard",*/}
-                        {/*    redirect: true*/}
-                        {/*})} variant="outline" className="w-full">*/}
-                        {/*    Login with Github <Github className={"h-6 w-6 pl-2"}/>*/}
-                        {/*</Button>*/}
                         <Button formAction={signInWithGithub} variant="outline" className="w-full">
                             Login with Github <Github className={"h-6 w-6 pl-2"}/>
                         </Button>
-                        {/*<Button onClick={() => signIn('google', {*/}
-                        {/*    callbackUrl: "/dashboard",*/}
-                        {/*    redirect: true*/}
-                        {/*})} variant="outline" className="w-full">*/}
-                        {/*    Login with Google*/}
-                        {/*</Button>*/}
-
                         <Button formAction={signInWithGoogle} variant="outline" className="w-full">
                             Login with Google
                         </Button>

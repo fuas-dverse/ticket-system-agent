@@ -1,37 +1,70 @@
 import {TableCell, TableRow} from "@/components/ui/table";
-import {KeyIcon, MoveHorizontalIcon} from "lucide-react";
+import {CopyIcon, FerrisWheel, KeyIcon, LoaderPinwheel, MoveHorizontalIcon, Settings} from "lucide-react";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
-import {IKeys} from "@/app/dashboard/keys/page";
 import {Button} from "@/components/ui/button";
+import {toast} from "@/components/ui/use-toast";
+import {useState} from "react";
 
 interface Props {
-    keyProps: IKeys
+    keyProps: any
 }
 
 export default function KeysTableRow({keyProps}: Props) {
+    const createdAt = new Date(keyProps.created_at).toISOString().split('T')[0]
+    const updatedAt = new Date(keyProps.updated_at).toISOString().split('T')[0]
+    const expiresAt = new Date(keyProps.expires_at).toISOString().split('T')[0]
+    const [showKey, setShowKey] = useState(false);
+
     return (
-        <TableRow>
-            <TableCell className="font-medium">
+        <TableRow className={"relative w-full"}>
+            <TableCell className="">
                 <div className="flex items-center gap-2">
                     <KeyIcon className="h-5 w-5 text-gray-500 dark:text-gray-400"/>
-                    <span>{keyProps.name}</span>
+                    <span>{keyProps.api.name}</span>
                 </div>
             </TableCell>
-            <TableCell>{keyProps.created}</TableCell>
-            <TableCell>{keyProps.lastUsed}</TableCell>
-            <TableCell>{keyProps.api_url}</TableCell>
-            <TableCell className="text-right">
+
+            <TableCell className={""}>
+                <div className={"hover:cursor-pointer"} onClick={() => {
+                    // function to copy the text to clipboard
+                    navigator.clipboard.writeText(keyProps.api.endpoint);
+                    toast({
+                        title: "URL Copied to clipboard",
+                    })
+                }}>
+                    {keyProps.api.endpoint.substring(0, 20)}
+                    ...
+                    {keyProps.api.endpoint.substring(keyProps.api.endpoint.length - 10, keyProps.api.endpoint.length)}
+
+                </div>
+            </TableCell>
+            <TableCell className={""}>
+                <div className={"flex"}>
+                    ******
+                    <CopyIcon
+                        className="h-5 w-5 ml-2 text-gray-500 dark:text-gray-400 hover:cursor-pointer"
+                        onClick={() => {
+                            navigator.clipboard.writeText(keyProps.key);
+                            toast({
+                                title: "Key Copied to clipboard",
+                            })
+                        }}
+                    />
+                </div>
+            </TableCell>
+            <TableCell className={""}>{createdAt.toString()}</TableCell>
+            <TableCell className={""}>{updatedAt.toString()}</TableCell>
+            <TableCell className={""}>{expiresAt.toString()}</TableCell>
+            <TableCell className="text-right ">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button size="icon" variant="ghost">
-                            <MoveHorizontalIcon className="h-5 w-5"/>
+                            <Settings className="h-5 w-5"/>
                             <span className="sr-only">More actions</span>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem>View</DropdownMenuItem>
-                        <DropdownMenuItem>Regenerate</DropdownMenuItem>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
+                        <DropdownMenuItem className={"text-red-500"}>Delete</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </TableCell>
