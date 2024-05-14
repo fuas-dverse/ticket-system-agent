@@ -71,6 +71,10 @@ export default function Page() {
         })
     }
 
+    const handleKeyDelete = (keyId: string) => {
+        setUserKeys((prevKeys) => prevKeys.filter((key) => key.id !== keyId));
+    };
+
     return (
         <div className="py-4">
             <h1 className={"text-2xl font-bold"}>Your keys</h1>
@@ -113,7 +117,11 @@ export default function Page() {
                         {
                             filteredKeys.length > 0 ? (
                                 filteredKeys.map((keyProps, index) => {
-                                    return <KeysTableRow key={index} keyProps={keyProps}/>
+                                    return <KeysTableRow
+                                        key={index}
+                                        keyProps={keyProps}
+                                        onDelete={handleKeyDelete}
+                                    />
                                 })
                             ) : (
                                 <tr>

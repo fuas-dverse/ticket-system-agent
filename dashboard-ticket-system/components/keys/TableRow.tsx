@@ -1,19 +1,36 @@
+"use client"
 import {TableCell, TableRow} from "@/components/ui/table";
-import {CopyIcon, FerrisWheel, KeyIcon, LoaderPinwheel, MoveHorizontalIcon, Settings} from "lucide-react";
+import {CopyIcon, KeyIcon, Settings} from "lucide-react";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {Button} from "@/components/ui/button";
 import {toast} from "@/components/ui/use-toast";
-import {useState} from "react";
+import {createClient} from "@/utils/supabase/client";
+import {revalidatePath} from "next/cache";
 
 interface Props {
     keyProps: any
+    onDelete: (keyId: string) => void;
 }
 
-export default function KeysTableRow({keyProps}: Props) {
+export default function KeysTableRow({keyProps, onDelete}: Props) {
     const createdAt = new Date(keyProps.created_at).toISOString().split('T')[0]
     const updatedAt = new Date(keyProps.updated_at).toISOString().split('T')[0]
     const expiresAt = new Date(keyProps.expires_at).toISOString().split('T')[0]
-    const [showKey, setShowKey] = useState(false);
+    const supabase = createClient()
+
+    async function deleteKey() {
+        const { error } = await supabase.from("user_keys").delete().eq("id", keyProps.id);
+
+        if (error) {
+            console.error(error);
+        } else {
+            onDelete(keyProps.id);
+            toast({
+                title: "Key Deleted",
+                description: "The key has been deleted successfully"
+            });
+        }
+    }
 
     return (
         <TableRow className={"relative w-full"}>
@@ -64,7 +81,7 @@ export default function KeysTableRow({keyProps}: Props) {
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem className={"text-red-500"}>Delete</DropdownMenuItem>
+                        <DropdownMenuItem onClick={deleteKey} className={"text-red-500"}>Delete</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </TableCell>
