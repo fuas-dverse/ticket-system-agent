@@ -6,6 +6,7 @@ import sentry_sdk
 
 load_dotenv()
 
+
 SECRET_API_KEY = os.getenv('API_KEY')
 SENTRY_KEY = os.getenv('SENTRY_DSN')
 
