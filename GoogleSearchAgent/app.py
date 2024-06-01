@@ -6,7 +6,6 @@ import sentry_sdk
 
 load_dotenv()
 
-
 SECRET_API_KEY = os.getenv('API_KEY')
 SENTRY_KEY = os.getenv('SENTRY_DSN')
 
@@ -57,6 +56,11 @@ def get_response():
     return jsonify({'response': response}), 200
 
 
+@app.route('/health_check', methods=['GET'])
+def health_check():
+    return jsonify({'status': 'ok'}), 200
+
+
 # Adding security headers
 @app.after_request
 def add_security_headers(response):
@@ -99,7 +103,6 @@ def add_security_headers(response):
         "web-share=(), "
         "xr-spatial-tracking=()"
     )
-
 
     return response
 
