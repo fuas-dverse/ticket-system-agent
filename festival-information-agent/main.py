@@ -1,74 +1,90 @@
-import json
 import os
 from dotenv import load_dotenv
-from langchain_community.vectorstores.mongodb_atlas import MongoDBAtlasVectorSearch
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableParallel, RunnablePassthrough
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_huggingface import HuggingFaceEndpoint
+from pymongo import MongoClient
+from sentence_transformers import SentenceTransformer
+from agentDVerse.agent import Agent
 
 load_dotenv()
 
-MONGO_URI = os.environ.get("MONGO_URI")
-DB_NAME = "festival_database"
-COLLECTION_NAME = "festivals"
-ATLAS_VECTOR_SEARCH_INDEX_NAME = "vector_index"
+client = MongoClient(os.environ["MONGO_URI"])
+db = client.festival_database
+collection = db.festivals
 
 
-def get_vector_search_data(search_input):
-    vectorstore = MongoDBAtlasVectorSearch.from_connection_string(
-        MONGO_URI,
-        DB_NAME + "." + COLLECTION_NAME,
-        embedding=OpenAIEmbeddings(disallowed_special=(), model="text-embedding-3-small"),
-        index_name=ATLAS_VECTOR_SEARCH_INDEX_NAME,
-        text_key="name"
+class FestivalInformationAgent:
+    def __init__(self):
+        self.model = HuggingFaceEndpoint(repo_id="mistralai/Mistral-7B-Instruct-v0.2", task="text-generation", temperature=0.8)
+        self.embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+
+    def get_vector_search_data(self, search_input):
+        query_embedding = self.embedding_model.encode(search_input).tolist()
+
+        query_result = list(db.festivals.aggregate([
+            {
+                "$vectorSearch": {
+                    "index": "vector_index",
+                    "path": "embedding",
+                    "queryVector": query_embedding,
+                    "numCandidates": 20,
+                    "limit": 10
+                }
+            }
+        ]))
+
+        new_result = [{k: v for k, v in item.items() if k != 'embedding'} for item in query_result]
+
+        return new_result
+
+    def get_festival_information(self, context, question):
+        prompt = ChatPromptTemplate.from_template(
+            """
+            Answer the question based only on the following context: {context}
+            Question: {question}
+            """
+        )
+
+        chain = (
+                RunnableParallel({
+                    "context": str,
+                    "question": RunnablePassthrough()
+                })
+                | prompt
+                | self.model
+                | StrOutputParser()
+        )
+
+        return chain.invoke({
+            "context": context,
+            "question": question
+        })
+
+
+def search_festival(x):
+    vector_search = festival_agent.get_vector_search_data(x)
+    result = festival_agent.get_festival_information(
+        context=vector_search,
+        question=x
     )
 
-    vectorstore = vectorstore.as_retriever(search_kwargs={"k": 10})
-
-    output = vectorstore.get_relevant_documents(search_input)
-    for item in output:
-        if hasattr(item, "metadata") and "embedding" in item.metadata:
-            del item.metadata["embedding"]
-
-        if hasattr(item, "metadata") and "_id" in item.metadata:
-            del item.metadata["_id"]
-
-    return output
-
-
-def get_festival_information(context, question):
-    prompt = ChatPromptTemplate.from_template(
-        """Answer the question based only on the following context: {context}
-        Question: {question}"""
+    agent.send_response_to_next(
+        initial=x,
+        message={
+            "message": result
+        }
     )
-
-    model = ChatOpenAI()
-
-    chain = (
-            RunnableParallel({
-                "context": str,
-                "question": RunnablePassthrough()
-            })
-            | prompt
-            | model
-            | StrOutputParser()
-    )
-
-    return chain.invoke({
-        "context": context,
-        "question": question
-    })
 
 
 if __name__ == "__main__":
-    user_input = input("> Query: ")
-
-    vector_search = get_vector_search_data(user_input)
-
-    result = get_festival_information(
-        context=vector_search,
-        question=user_input
+    agent = Agent(
+        name="Festival Information Agent",
+        description="This agent provides information about upcoming festivals.",
+        topics=["festival", "party", "festival-information"],
+        output_format="text",
+        callback=search_festival
     )
 
-    print(result)
+    festival_agent = FestivalInformationAgent()
