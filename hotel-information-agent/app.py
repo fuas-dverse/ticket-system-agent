@@ -15,8 +15,7 @@ def search_hotels(user_input):
     city = locationtagger.find_locations(text=user_input.title()).cities[0] if locationtagger.find_locations(text=user_input.title()).cities else None
     if city:
         try:
-            location_data = requests.get("https://booking-com.p.rapidapi.com/v1/hotels/locations", headers=headers,
-                                         params={"name": city, "locale": "en-gb"}).json()[0]
+            location_data = requests.get("https://booking-com.p.rapidapi.com/v1/hotels/locations", headers=headers, params={"name": city, "locale": "en-gb"}).json()[0]
             hotels = requests.get("https://booking-com.p.rapidapi.com/v1/hotels/search", headers=headers, params={
                 "dest_id": location_data["dest_id"],
                 "dest_type": location_data["dest_type"],
@@ -35,7 +34,7 @@ def search_hotels(user_input):
         except requests.exceptions.RequestException as e:
             return f"An error occurred: {e}"
     else:
-        print("No city found in the input.")
+        return None
 
 
 @app.route("/<prompt>", methods=['GET'])
