@@ -6,7 +6,7 @@ from langchain_core.runnables import RunnableParallel, RunnablePassthrough
 from langchain_huggingface import HuggingFaceEndpoint
 from pymongo import MongoClient
 from sentence_transformers import SentenceTransformer
-from agentDVerse.agent import Agent
+from agentDVerse import Agent
 
 load_dotenv()
 
