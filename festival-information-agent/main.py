@@ -21,6 +21,7 @@ class FestivalInformationAgent:
         self.embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
     def get_vector_search_data(self, search_input):
+        search_input = search_input.get("classifier-agent").get("message")
         query_embedding = self.embedding_model.encode(search_input).tolist()
 
         query_result = list(db.festivals.aggregate([
@@ -70,6 +71,8 @@ def search_festival(x):
         question=x
     )
 
+    print(result)
+
     agent.send_response_to_next(
         initial=x,
         message={
@@ -79,6 +82,8 @@ def search_festival(x):
 
 
 if __name__ == "__main__":
+    festival_agent = FestivalInformationAgent()
+
     agent = Agent(
         name="Festival Information Agent",
         description="This agent provides information about upcoming festivals.",
@@ -86,5 +91,3 @@ if __name__ == "__main__":
         output_format="text",
         callback=search_festival
     )
-
-    festival_agent = FestivalInformationAgent()
