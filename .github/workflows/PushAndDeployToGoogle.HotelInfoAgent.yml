@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - hotel-information-agent/**
+      - .github/workflows/PushAndDeployToGoogle.HotelInfoAgent.yml
+
   
 jobs:  
   deploy:  
