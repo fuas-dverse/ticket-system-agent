@@ -1,8 +1,6 @@
 import requests
 import locationtagger
-from flask import Flask
-
-app = Flask(__name__)
+from agentDVerse import Agent
 
 
 def search_hotels(user_input):
@@ -16,18 +14,24 @@ def search_hotels(user_input):
     if city:
         try:
             location_data = requests.get("https://booking-com.p.rapidapi.com/v1/hotels/locations", headers=headers, params={"name": city, "locale": "en-gb"}).json()[0]
-            hotels = requests.get("https://booking-com.p.rapidapi.com/v1/hotels/search", headers=headers, params={
-                "dest_id": location_data["dest_id"],
-                "dest_type": location_data["dest_type"],
-                "adults_number": "2",
-                "checkin_date": "2024-09-14",
-                "checkout_date": "2024-09-15",
-                "order_by": "popularity",
-                "filter_by_currency": "EUR",
-                "room_number": "1",
-                "locale": "en-gb",
-                "units": "metric",
-            }).json().get("result")[:3]
+
+            hotels = requests.get(
+                url="https://booking-com.p.rapidapi.com/v1/hotels/search",
+                headers=headers,
+                params={
+                    "dest_id": location_data["dest_id"],
+                    "dest_type": location_data["dest_type"],
+                    "adults_number": "2",
+                    "checkin_date": "2024-09-14",
+                    "checkout_date": "2024-09-15",
+                    "order_by": "popularity",
+                    "filter_by_currency": "EUR",
+                    "room_number": "1",
+                    "locale": "en-gb",
+                    "units": "metric",
+                }
+            ).json().get("result")[:3]
+
             return [{"name": hotel.get("hotel_name"), "address": hotel.get("address"),
                      "rating": hotel.get("review_score_word"), "price": hotel.get("min_total_price"),
                      "url": hotel.get("url"), "image": hotel.get("main_photo_url")} for hotel in hotels]
@@ -37,11 +41,24 @@ def search_hotels(user_input):
         return None
 
 
-@app.route("/<prompt>", methods=['GET'])
-def get_hotel(prompt: str):
-    found_hotels = search_hotels(prompt)
+def callback(x):
+    result = search_hotels(x.get("content")[0].get("message"))
 
-    if not found_hotels:
-        return {"error": "No hotels found."}
+    print(result)
 
-    return found_hotels
+    agent.send_response_to_next(
+        initial=x,
+        message={
+            "message": result
+        }
+    )
+
+
+if __name__ == "__main__":
+    agent = Agent(
+        name="Hotel Information Agent",
+        description="This agent provides information about hotels in a certain region.",
+        topics=["hotel", "accommodation", "hotel-information"],
+        output_format="json",
+        callback=callback
+    )

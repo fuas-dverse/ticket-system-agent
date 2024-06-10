@@ -1,7 +1,6 @@
 import json
 import os
 from dotenv import load_dotenv
-from openai import OpenAI
 from pymongo import MongoClient
 
 load_dotenv()

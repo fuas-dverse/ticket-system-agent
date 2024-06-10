@@ -20,4 +20,4 @@ CMD [ "python3", "init.py"]
 EXPOSE 8080
 
 # Run the FastAPI application using uvicorn server
-CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0", "--port=8080"]
+CMD ["python", "app.py"]

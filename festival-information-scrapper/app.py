@@ -1,23 +1,18 @@
 import json
 import os
 from datetime import datetime
-
 import ephem
 import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
-from openai import OpenAI
 from pymongo import MongoClient
+from sentence_transformers import SentenceTransformer
 
 load_dotenv()
 
-open_ai_client = OpenAI(
-    api_key=os.environ.get("OPENAI_API_KEY"),
-)
-
 
 class Festival:
-    def __init__(self, name, description, city, location, latitude, longitude, start_date, end_date, season, price, age, embedding):
+    def __init__(self, name, description, city, location, latitude, longitude, start_date, end_date, season, price, age):
         self.name = name
         self.description = description
         self.city = city
@@ -120,7 +115,6 @@ def scrap_festival_information():
                     end_date,
                     get_season_from_date(start_date),
                     price,
-                    None,
                     None
                 ).to_dict()
             )
@@ -130,17 +124,11 @@ def scrap_festival_information():
 
 
 def generate_embedding(all_festivals):
-    for festival in all_festivals:
-        name_embedding = open_ai_client.embeddings.create(
-            input=[
-                festival["name"],
-                festival["season"]
-            ],
-            model="text-embedding-3-small",
-            dimensions=1536
-        ).data[0].embedding
+    model = SentenceTransformer("all-MiniLM-L6-v2")
 
-        festival["name_embedding"] = name_embedding
+    for festival in all_festivals:
+        embedding = model.encode(festival["name"]).tolist()  # Ensure embedding is a list for JSON serialization
+        festival["embedding"] = embedding
 
 
 if __name__ == "__main__":
