@@ -22,7 +22,9 @@ jobs:
           credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}  
   
       - name: 'Set up Cloud SDK'  
-        uses: 'google-github-actions/setup-gcloud@v2'  
+        uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          install_components: 'gke-gcloud-auth-plugin'
   
       - name: Build and Push Docker Image  
         env:  
