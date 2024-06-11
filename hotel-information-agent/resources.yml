@@ -6,9 +6,6 @@ metadata:
 spec:
   selector:
     app: python
-  ports:
-    - port: 80
-      targetPort: 80
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -29,41 +26,3 @@ spec:
       containers:
         - name: python
           image: europe-west4-docker.pkg.dev/secret-willow-423606-j1/hotel-information-agent/python:latest
-          ports:
-            - containerPort: 80
-          env:
-            - name: MILVUS_URI
-              valueFrom:
-                secretKeyRef:
-                  name: secrets
-                  key: MILVUS_URI
-            - name: MILVUS_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: secrets
-                  key: MILVUS_TOKEN
-            - name: KAFKA_BOOTSTRAP_SERVER
-              valueFrom:
-                secretKeyRef:
-                  name: secrets
-                  key: KAFKA_BOOTSTRAP_SERVER
-            - name: KAFKA_SECURITY_PROTOCOL
-              valueFrom:
-                secretKeyRef:
-                  name: secrets
-                  key: KAFKA_SECURITY_PROTOCOL
-            - name: KAFKA_SASL_MECHANISMS
-              valueFrom:
-                secretKeyRef:
-                  name: secrets
-                  key: KAFKA_SASL_MECHANISMS
-            - name: KAFKA_SASL_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: secrets
-                  key: KAFKA_SASL_USERNAME
-            - name: KAFKA_SASL_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: secrets
-                  key: KAFKA_SASL_PASSWORD
