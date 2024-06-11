@@ -34,5 +34,5 @@ jobs:
 
       - name: Deploy to GKE
         run: |  
-          gcloud container cluster get-credentials autopilot-hotel-information-agent --region europe-west4  
+          gcloud container clusters get-credentials autopilot-hotel-information-agent --region europe-west4  
           kubectl apply -f resources.yml
