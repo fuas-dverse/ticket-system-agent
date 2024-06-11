@@ -7,7 +7,6 @@ on:
       - .github/workflows/PushToAzureContainerRegistry.HotelInfoAgent.yml
     branches:
       - main
-      - dev
 
 env:
   AZURE_WEBAPP_NAME: DverseHotelInformationAgentApp
