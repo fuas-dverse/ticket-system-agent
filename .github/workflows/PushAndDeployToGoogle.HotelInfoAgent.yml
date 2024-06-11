@@ -31,3 +31,8 @@ jobs:
           gcloud auth configure-docker europe-west4-docker.pkg.dev  
           docker build -t europe-west4-docker.pkg.dev/$GOOGLE_PROJECT/hotel-information-agent/python:latest -f ./hotel-information-agent/Dockerfile ./hotel-information-agent
           docker push europe-west4-docker.pkg.dev/$GOOGLE_PROJECT/hotel-information-agent/python:latest
+
+      - name: Deploy to GKE
+        run: |  
+          gcloud container cluster get-credentials autopilot-hotel-information-agent --region europe-west4  
+          kubectl apply -f resources.yml
