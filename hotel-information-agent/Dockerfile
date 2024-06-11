@@ -1,5 +1,5 @@
 # Use the official Python base image
-FROM python:3.12-slim
+FROM python:3.12.3-slim
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -13,7 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the application code to the working directory
 COPY . .
 
-# Run the init script to download nltk packages
+## Run the init script to download nltk packages
 CMD [ "python3", "init.py"]
 
 # Expose the port on which the application will run

@@ -1,6 +1,7 @@
 import requests
 import locationtagger
 from agentDVerse import Agent
+from init import download_nltk_data
 
 
 def search_hotels(user_input):
