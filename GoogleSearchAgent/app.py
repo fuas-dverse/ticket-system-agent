@@ -42,9 +42,9 @@ def callback(x):
 
 if __name__ == '__main__':
     agent = Agent(
-        name="Google Search Agent",
-        description="A simple agent that fetches search results from Google",
-        topics=["search", "google"],
+        name="Google Search Link Agent",
+        description="A simple agent that fetches search results from Google and returns a list of URLs.",
+        topics=["search", "google", "links", "urls"],
         output_format="json",
         callback=callback
     )
