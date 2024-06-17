@@ -1,14 +1,17 @@
+    # Import necessary modules
 from googlesearch import search
-from flask import Flask, request, jsonify, abort
 from dotenv import load_dotenv
 import os
 import sentry_sdk
+from agentDVerse import Agent
 
+# Load environment variables from .env file
 load_dotenv()
 
-SECRET_API_KEY = os.getenv('API_KEY')
+# Get Sentry DSN from environment variables
 SENTRY_KEY = os.getenv('SENTRY_DSN')
 
+# Initialize Sentry SDK for error tracking and performance monitoring
 sentry_sdk.init(
     dsn=SENTRY_KEY,
     # Set traces_sample_rate to 1.0 to capture 100%
@@ -20,92 +23,48 @@ sentry_sdk.init(
     profiles_sample_rate=1.0,
 )
 
-app = Flask(__name__)
-
-
 def fetch_google_results(query):
+    """
+    Function to fetch Google search results for a given query.
+
+    Args:
+        query (str): The search query.
+
+    Returns:
+        list: A list of URLs from the search results. Returns an empty list if an error occurs.
+    """
     try:
         return list(search(query, num_results=3))
     except Exception as e:
         print("An error occurred:", e)
         return []
 
+def callback(x):
+    """
+    Callback function to process the search query and send the response.
 
-def require_api_key(view_function):
-    def decorated_function(*args, **kwargs):
-        expected_key = os.getenv('API_KEY')  # Make sure this matches your environment config
-        provided_key = request.headers.get('Authorization')
-        if not provided_key or provided_key != f'Bearer {expected_key}':
-            abort(401)  # Unauthorized access
-        return view_function(*args, **kwargs)
+    Args:
+        x (dict): The input data containing the search query.
 
-    return decorated_function
+    Returns:
+        None
+    """
+    result = fetch_google_results(x.get("content")[0].get("message"))
+    print(result)
 
-
-@app.route('/', methods=['POST'])
-@require_api_key
-def get_response():
-    data = request.json
-    query = data.get("query")
-
-    if query is None or query == "":
-        return jsonify({"error": "You must fill in a search query!"}), 400  # Using 400 for client error
-
-    response = fetch_google_results(query)
-
-    return jsonify({'response': response}), 200
-
-
-@app.route('/health_check', methods=['GET'])
-def health_check():
-    return jsonify({'status': 'ok'}), 200
-
-
-# Adding security headers
-@app.after_request
-def add_security_headers(response):
-    response.headers['Content-Security-Policy'] = "default-src 'self'"
-    response.headers['X-Content-Type-Options'] = 'nosniff'
-    response.headers['X-Frame-Options'] = 'DENY'
-    response.headers['X-XSS-Protection'] = '1; mode=block'
-    response.headers['Referrer-Policy'] = 'no-referrer'
-    response.headers['Strict-Transport-Security'] = 'max-age=63072000; includeSubDomains'
-
-    response.headers['Permissions-Policy'] = (
-        "accelerometer=(), "
-        "ambient-light-sensor=(), "
-        "autoplay=(), "
-        "battery=(), "
-        "camera=(), "
-        "cross-origin-isolated=(), "
-        "display-capture=(), "
-        "document-domain=(), "
-        "encrypted-media=(), "
-        "execution-while-not-rendered=(), "
-        "execution-while-out-of-viewport=(), "
-        "fullscreen=(), "
-        "geolocation=(), "
-        "gyroscope=(), "
-        "layout-animations=(), "
-        "legacy-image-formats=(), "
-        "magnetometer=(), "
-        "microphone=(), "
-        "midi=(), "
-        "navigation-override=(), "
-        "oversized-images=(), "
-        "payment=(), "
-        "picture-in-picture=(), "
-        "publickey-credentials-get=(), "
-        "screen-wake-lock=(), "
-        "serial=(), "
-        "sync-xhr=(), "
-        "usb=(), "
-        "web-share=(), "
-        "xr-spatial-tracking=()"
+    agent.send_response_to_next(
+        initial=x,
+        message={
+            "message": result
+        }
     )
 
-    return response
-
-
 if __name__ == '__main__':
-    app.run(port=5002)
+    # Create an instance of the Agent class
+    agent = Agent(
+        name="Google Search Link Agent",
+        description="A simple agent that fetches search results from Google and returns a list of URLs.",
+        topics=["search", "google", "links", "urls"],
+        output_format="json",
+        callback=callback
+    )

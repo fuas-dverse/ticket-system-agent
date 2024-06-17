@@ -1,4 +1,4 @@
-FROM python:3.12-alpine
+FROM python:3.12
 
 WORKDIR /app
 
@@ -11,4 +11,4 @@ EXPOSE 5002
 ENV NAME GoogleSearchAgent
 
 # Run your app.py script as entrypoint
-CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0", "--port=5002"]
+CMD [ "python3", "app.py"]
