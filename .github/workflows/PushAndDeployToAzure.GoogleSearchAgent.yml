@@ -4,6 +4,8 @@ env:
   AZURE_WEBAPP_NAME: DVerseGoogleSearchAgent
 
 on:
+  branches:
+      - production 
   push:
     paths:
       - GoogleSearchAgent/**
