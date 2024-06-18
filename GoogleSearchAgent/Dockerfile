@@ -1,14 +1,20 @@
-FROM python:3.12
+# Use the official Python base image
+FROM python:3.12.3-slim
 
+# Set the working directory inside the container
 WORKDIR /app
 
-COPY . .
+# Copy the requirements file to the working directory
+COPY requirements.txt .
 
+# Install the Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-EXPOSE 5002
+# Copy the application code to the working directory
+COPY . .
 
-ENV NAME GoogleSearchAgent
+# Expose the port on which the application will run
+EXPOSE 8080
 
-# Run your app.py script as entrypoint
-CMD [ "python3", "app.py"]
+# Run the FastAPI application using uvicorn server
+CMD ["python", "app.py"]
