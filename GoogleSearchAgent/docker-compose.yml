@@ -1,8 +1,6 @@
-version: '3'
 services:
   app:
-    image: google-search-agent
+    build:
+      context: .
     ports:
-      - "5002:5002"
-    env_file:
-      - .env
+      - "8080:8080"
