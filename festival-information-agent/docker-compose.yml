@@ -1,0 +1,12 @@
+services:
+  festival_information_api:
+    build:
+      context: ./festival-information-api
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+
+  festival_information_agent:
+    build:
+      context: ./festival-information-agent
+      dockerfile: Dockerfile
