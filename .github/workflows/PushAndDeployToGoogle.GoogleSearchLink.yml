@@ -1,0 +1,41 @@
+name: Deploy Google Search Link Agent to Google Kubernetes Engine
+
+on:  
+  push:  
+    branches:  
+      - main
+    paths:
+      - GoogleSearchAgent/**
+      - .github/workflows/PushAndDeployToGoogle.GoogleSearchLink.yml
+
+jobs:  
+  deploy:  
+    runs-on: ubuntu-latest  
+    steps:  
+      - name: Checkout Code  
+        uses: actions/checkout@v4
+
+      - name: Authenticate with Google Cloud  
+        uses: 'google-github-actions/auth@v2'  
+        with:  
+          credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_GOOGLE_SEARCH_LINK }}  
+
+      - name: 'Set up Cloud SDK'  
+        uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          install_components: 'gke-gcloud-auth-plugin'
+
+      - name: Build and Push Docker Image
+        env:
+          GOOGLE_PROJECT: ${{ secrets.GOOGLE_PROJECT_GOOGLE_SEARCH_LINK }}
+        run: |
+          gcloud auth configure-docker europe-west4-docker.pkg.dev
+          docker build -t europe-west4-docker.pkg.dev/$GOOGLE_PROJECT/google-search-link-agent/python:latest -f ./GoogleSearchAgent/Dockerfile ./GoogleSearchAgent
+          docker push europe-west4-docker.pkg.dev/$GOOGLE_PROJECT/google-search-link-agent/python:latest
+
+      - name: Deploy to GKE
+        env:
+          GOOGLE_PROJECT: ${{ secrets.GOOGLE_PROJECT_GOOGLE_SEARCH_LINK }}
+        run: |
+          gcloud container clusters get-credentials google-search-link-agent --region europe-west1
+          kubectl apply -f ./GoogleSearchAgent/resources.yml
